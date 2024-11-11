@@ -6,91 +6,124 @@ export class HaxCard extends LitElement {
   constructor() {
     super();
     this.title = '';
-    this.source = '';
-    this.alt = '';
-    
+    this.description = '';
+    this.created = '';
+    this.lastUpdated = '';
+    this.logo = '';
+    this.slug = 'google.com';
+    this.baseURL = 'google.com';
   }
 
   static get properties() {
     return {
-        source: { type: String },
-        title: { type: String },
-        alt: { type: String }, 
-        
+      title: { type: String },
+      description: { type: String },
+      created: { type: String },
+      lastUpdated: { type: String },
+      logo: { type: String },
+      slug: { type: String },
+      baseURL: { type: String }
     };
   }
 
   static get styles() {
-    return [css`
-
-    .card{
-      background-color: var(--ddd-theme-default-alertNonEmergency);
-      border-radius: 8px;
-      padding: 16px;
-      margin: 20px;
-      border: var(--ddd-theme-default-keystoneYellow);
-      border-width: 8px;
-      width: 240px;
-      height: 360px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-    
-    .card:hover{
-      background-color: var(--ddd-theme-default-accent);
-    }
-
-    img {
-      width: 240px;
-      height: 200px;
-      display: block;
-      border-radius: 4px;
-      
-    }
-
-    .details{
-      text-align: center;
-      font-size: 20px;
-      font-family: 'Times New Roman', Times, serif;
-    }
-    .creator{
-      font-size: 16px;
-      font-style: italic;
-      color: var(--ddd-theme-default-coalyGray);
-    }
-
-    `];
+    return css`
+      .card {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 320px;
+        border-radius: var(--ddd-radius-xs);
+        padding: 16px;
+        background-color: var(--ddd-theme-default-alertNonEmergency);
+        border: 2px solid var(--ddd-theme-default-info);
+        height: 480px;
+        cursor: pointer;
+      }
+  
+      img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .img-container {
+        width: 100%;
+        border-radius: var(--ddd-radius-md);
+        background-color: var(--ddd-theme-default-potential0);
+        aspect-ratio: 1.5; 
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+      }
+  
+      .card:focus {
+        background-color: var(--ddd-theme-default-successLight);
+      }
+  
+      .card:hover {
+        background-color: var(--ddd-theme-default-alertUrgent);
+      }
+  
+      .info {
+        text-align: center;
+        margin-top: var(--ddd-spacing-3);
+        font-size: var(--ddd-font-size-lg);
+        font: var(--ddd-font-primary);
+        font-weight: var(--ddd-font-weight-regular);
+        color: var(--ddd-theme-default-navy80);
+        line-height: var(--ddd-lh-auto);
+      }
+  
+      .text {
+        font-size: var(--ddd-font-size-m);
+        font: var(--ddd-font-primary);
+        color: var(--ddd-theme-default-potential-50);
+        font-weight: var(--ddd-font-weight-regular);
+        margin-top: 8px;
+        line-height: var(--ddd-lh-auto);
+        text-align: center;
+      }
+  
+    `;
   }
+  
+
   render() {
     return html`
-      <div class="card" @click="${this.newWindow}" tabindex="0" @keydown="${this.keydownHandler}">
-        <a href="${this.source}" target="_blank">
-          <img src="${this.source}" alt="${this.alt}" />
-        </a>
-        <div class="details">${this.title}</div>
-        <div class="creator">Media Owner: ${this.secondary_creator}</div>
+      <div
+        class="card"
+        tabindex="0"
+        @click="${this.openWindow}"
+        @keyup="${this.enter}"
+      >
+        <div class="img-container">
+          <img src="${this.baseURL}/${this.logo}" alt="${this.title}" />
+        </div>
+        <div class="info">${this.title}</div>
+        <div class="text">${this.description}</div>
       </div>
     `;
   }
 
-  openImage() {
-    window.open(this.source, '_blank');
-  }
+  openWindow() {
 
-  keydownHandler(event) {
-    if (event.key === 'Enter') {
-      this.openImage();
+      window.open((this.baseURL+'/'+this.slug), '_blank');
+  }  
+
+  enter(e) {
+    if (e.key === 'Enter') {
+      this.openSlug();
     }
   }
-  static get tag() {
-    return "nasa-image";
-  }
 
-  static get haxProperties() {
-    return new URL(`./lib/${this.tag}.haxProperties.json`, import.meta.url)
-      .href;
+  static get tag() {
+    return "hax-card";
   }
 }
+
 customElements.define(HaxCard.tag, HaxCard);
