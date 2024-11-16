@@ -1,28 +1,29 @@
 import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
+import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 
-export class HaxCard extends LitElement {
+export class HaxCard extends DDDSuper(I18NMixin(LitElement)) {
 
   constructor() {
     super();
     this.title = '';
     this.description = '';
-    this.created = '';
-    this.lastUpdated = '';
-    this.logo = '';
-    this.slug = 'google.com';
-    this.baseURL = 'google.com';
+    this.imgSrc = '';
+    this.dateCreated = '';
+    this.dateUpdated = '';
+    this.link = '';
+    this.Html = '';
   }
 
   static get properties() {
     return {
       title: { type: String },
       description: { type: String },
-      created: { type: String },
-      lastUpdated: { type: String },
-      logo: { type: String },
-      slug: { type: String },
-      baseURL: { type: String }
+      imgSrc: { type: String },
+      dateCreated: { type: String },
+      dateUpdated: { type: String },
+      link: { type: String },
+      html: { type: String },
     };
   }
 
