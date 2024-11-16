@@ -1,105 +1,118 @@
 import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
-import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 import "./hax-card.js";
-import "./hax-overview.js"; 
-
-export class HaxSearch extends DDDSuper(I18NMixin(LitElement)) {
-
+export class HaxSearch extends LitElement {
+  
+  constructor() {
+    super();
+    this.value = '';
+    this.title = '';
+    this.loading = false;
+    this.items = [];
+    this.jsonUrl = 'https://haxtheweb.org/site.json';
+    this.baseUrl = this.noJsonTag(this.jsonUrl);
+  }
   static get properties() {
     return {
       title: { type: String },
       loading: { type: Boolean, reflect: true },
-      items: { type: Array },
-      data: { type: Object },
       jsonUrl: { type: String },
+      baseUrl: { type: String },
+      items: { type: Array },
+      value: { type: String },
     };
   }
-
-  constructor() {
-    super();
-    this.title = '';
-    this.loading = false;
-    this.items = [];
-    this.data = null; 
-    this.jsonUrl = '';
-  }
-
   static get styles() {
-    return [super.styles, css`
+    return css`
       :host {
         display: block;
+      }
+      .search-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--ddd-theme-default-errorLight);
+        border-radius: var(--ddd-radius-xs);
+        border: 4px solid var(--ddd-theme-default-potentialMidnight);
+        padding: 4px 12px;
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+      }
+      .input {
+        font-size: 16px;
+        line-height: var(--ddd-lh-auto);
+      }
+      .results {
+        height: 100%;
+      }
+      input {
+        font-size: 24px;
+        line-height: var(--ddd-lh-auto);
         width: 100%;
       }
-      `];
+    `;
   }
-
   render() {
+   
     return html`
-      <h1>${this.title}</h1>
-      <div class="search-container">
-        <input
-          id="input"
-          class="search-input"
-          placeholder="https://haxtheweb.org/sit.json"
-          @keydown="${this.handleKeyDown}"
-          @input="${this.inputChanged}"
-           />
-          <button ?disabled="${!this.isValidUrl}" @click="${this.analyze}">Analyze!</button>
-      </div>
-
-      ${this.data?.name
-        ? html`
-          <div class="siteOverview-container"></div-class>
-           <site-overview
-              title="${this.data.name}"
-              description="${this.data.description}"
-              logo="${this.data.metadata.site.logo}"
-              dateCreated="${this.formatDate(this.data.metadata.site.created)}"
-              dateUpdated="${this.formatDate(this.data.metadata.site.updated)}"
-              hexCode="${this.data.metadata.theme.variables.hexCode}"
-              theme="${this.data.metadata.theme.name}"
-              icon="${this.data.metadata.theme.variables.icon}"
-              jsonUrl="${this.jsonUrl}"
-           
-          ></site-overview>
-          </div>
-        `
-        : ''}
-
-        <div class="results-container">
-          ${this.items.length===0
-             ? console.log('items array is empty')
-          : this.items.map(item => 
-          html`
+      <h2>${this.title}</h2>
+        <div class="search-wrapper">
+          <input id="input" class="input" placeholder="https://haxtheweb.org/site.json" @input="${this.inputChanged}" />
+          <div class="search-button"><button @click="${this.analyze}">Analyze Site!</button></div>
+        </div>
+        <div class="results">
+          
+        ${this.items.map((item) => {
+          const img = item.metadata && item.metadata.files && item.metadata.files[0] ? item.metadata.files[0].url : '';
+          return html`
             <hax-card
               title="${item.title}"
               description="${item.description}"
-              dateCreated="${this.formatDate(item.metadata.created)}"
-              dateUpdated="${item.formatDate(item.metadata.updated)}"
-              logo="${item.metadata.site.logo}"
-              slug="https://haxtheweb.org/${item.slug}"
-              jsonUrl="${this.jsonUrl}"
-              indexSource="https://haxtheweb.org/${item.location}"
+              logo="${img}"
+              slug="${item.slug}"
+              baseURL="${this.baseUrl}"
             ></hax-card>
-          `)}
-          </div>
-              `;
-          
-          }
-
-          inputChanged(e) {
-            this.jsonUrl = e.target.value.trim();
-            this.isValidUrl = !!this.jsonUrl;
-          }
-
-          handleKeyDown(e) {
-            if (e.key === 'Enter' && this.isValidUrl) {
-              this.analyze();
-            }
-          }
-
-
+          `;
+        })}
+      </div>
       
     `;
   }
+  inputChanged(e) {
+    this.value = this.shadowRoot.querySelector('#input').value;
+  }
+  updated(changedProperties) {
+    if (changedProperties.has('value')) {
+      this.updateResults(this.value);
+    } else if (changedProperties.has('value') && !this.value) {
+      this.items = [];
+    }
+    if (changedProperties.has('items') && this.items.length > 0) {
+      console.log(this.items);
+    }
+  }
+  noJsonTag(url) {
+    return url.replace(/\/?[^\/]*\.json$/, '');
+  }
+  
+  updateResults(value) {
+    this.loading = true;
+    this.baseUrl = this.noJsonTag(this.jsonUrl);
+    fetch(this.jsonUrl)
+      .then(response => response.ok ? response.json() : {})
+      .then(data => {
+        if (data && Array.isArray(data.items)) {
+          this.items = data.items.filter(item => 
+            item.title.toLowerCase().includes(value.toLowerCase()) ||
+            item.description.toLowerCase().includes(value.toLowerCase())
+          );
+        }
+        this.loading = false;
+      });
+  }
+  static get tag() {
+    return 'hax-search';
+  }
+}
+customElements.define(HaxSearch.tag, HaxSearch);
