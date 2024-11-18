@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
 import "./hax-card.js";
-export class HaxSearch extends LitElement {
+export class HaxSearch extends DDDSuper(LitElement) {
   
   constructor() {
     super();
@@ -10,14 +10,14 @@ export class HaxSearch extends LitElement {
     this.loading = false;
     this.items = [];
     this.jsonUrl = 'https://haxtheweb.org/site.json';
-    this.baseUrl = this.noJsonTag(this.jsonUrl);
+    this.haxURL = this.noJsonTag(this.jsonUrl);
   }
   static get properties() {
     return {
       title: { type: String },
       loading: { type: Boolean, reflect: true },
       jsonUrl: { type: String },
-      baseUrl: { type: String },
+      haxURL: { type: String },
       items: { type: Array },
       value: { type: String },
     };
@@ -31,25 +31,29 @@ export class HaxSearch extends LitElement {
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: var(--ddd-theme-default-errorLight);
-        border-radius: var(--ddd-radius-xs);
+        background-color: var(--ddd-theme-default-navy40);
+        border-radius: var(--ddd-radius-sm);
         border: 4px solid var(--ddd-theme-default-potentialMidnight);
-        padding: 4px 12px;
         width: 100%;
         max-width: 400px;
-        margin: 20px auto;
+        padding: 16px;
+        margin: 48px auto;
       }
       .input {
         font-size: 16px;
         line-height: var(--ddd-lh-auto);
       }
-      .results {
+      .searchResults {
         height: 100%;
       }
       input {
         font-size: 24px;
         line-height: var(--ddd-lh-auto);
         width: 100%;
+      }
+      .search-button {
+        margin-left: 16px;
+
       }
     `;
   }
@@ -59,9 +63,9 @@ export class HaxSearch extends LitElement {
       <h2>${this.title}</h2>
         <div class="search-wrapper">
           <input id="input" class="input" placeholder="https://haxtheweb.org/site.json" @input="${this.inputChanged}" />
-          <div class="search-button"><button @click="${this.analyze}">Analyze Site!</button></div>
+          <div class="search-button"><button @click="${this.analyze}">Analyze HAX Site!</button></div>
         </div>
-        <div class="results">
+        <div class="searchResults">
           
         ${this.items.map((item) => {
           const img = item.metadata && item.metadata.files && item.metadata.files[0] ? item.metadata.files[0].url : '';
@@ -71,7 +75,7 @@ export class HaxSearch extends LitElement {
               description="${item.description}"
               logo="${img}"
               slug="${item.slug}"
-              baseURL="${this.baseUrl}"
+              haxURL="${this.haxURL}"
             ></hax-card>
           `;
         })}
@@ -98,7 +102,7 @@ export class HaxSearch extends LitElement {
   
   updateResults(value) {
     this.loading = true;
-    this.baseUrl = this.noJsonTag(this.jsonUrl);
+    this.haxURL = this.noJsonTag(this.jsonUrl);
     fetch(this.jsonUrl)
       .then(response => response.ok ? response.json() : {})
       .then(data => {

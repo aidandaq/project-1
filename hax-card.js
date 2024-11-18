@@ -1,39 +1,41 @@
 import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
+import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 
-export class HaxCard extends LitElement {
+export class HaxCard extends DDDSuper(I18NMixin(LitElement)){
 
   constructor() {
     super();
     this.title = '';
     this.description = '';
-    this.created = '';
-    this.lastUpdated = '';
+    this.dateCreated = '';
+    this.dateUpdated = '';
     this.logo = '';
     this.slug = '';
-    this.baseURL = '';
+    this.haxURL = '';
   }
 
   static get properties() {
     return {
       title: { type: String },
       description: { type: String },
-      created: { type: String },
-      lastUpdated: { type: String },
+      dateCreated: { type: String },
+      dateUpdated: { type: String },
       logo: { type: String },
       slug: { type: String },
-      baseURL: { type: String }
+      haxURL: { type: String }
     };
   }
   static get styles() {
     return css`
+
       .card {
         display: inline-flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         width: 100%;
-        max-width: 320px;
+        max-width: 260px;
         border-radius: var(--ddd-radius-xs);
         padding: 16px;
         background-color: var(--ddd-theme-default-alertNonEmergency);
@@ -93,6 +95,7 @@ export class HaxCard extends LitElement {
   
   render() {
     return html`
+   
      <div
         class="card"
         tabindex="0"
@@ -100,23 +103,26 @@ export class HaxCard extends LitElement {
         @keyup="${this.enter}"
       >
         <div class="img-container">
-          <img src="${this.baseURL}/${this.logo}" alt="${this.title}" />
+          <img src="${this.haxURL}/${this.logo}" alt="${this.title}" />
         </div>
         <div class="info">${this.title}</div>
         <div class="text">${this.description}</div>
+        <div class ="dateUpdated">${this.dateUpdated}</div>
+        <div class ="dateCreated">${this.dateCreated}</div>
       </div>
+      
     `;
   }
   openWindow() {
-    window.open((this.baseURL+'/'+this.slug), '_blank');
+    window.open((this.haxURL+'/'+this.slug), '_blank');
 }  
-enter(e) {
-  if (e.key === 'Enter') {
-    this.openSlug();
+  enter(e) {
+    if (e.key === 'Enter') {
+      this.openSlug();
+    }
   }
-}
-static get tag() {
+  static get tag() {
   return "hax-card";
-}
+  }
 }
 customElements.define(HaxCard.tag, HaxCard);
